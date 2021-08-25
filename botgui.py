@@ -447,11 +447,15 @@ class GUI(Frame):
 				print("Say something!")
 				audio = r.listen(source)
 				text = r.recognize_google(audio, language = 'en-IN', show_all = True)
-				for i in text["alternative"]:
-					trans = i["transcript"]
-					print(f"I thinks you said: {trans}")
-					# self.call_str("You: " + trans + "\n\n")
-					self.send_message(trans)
+				try:
+					for i in text["alternative"]:
+						trans = i["transcript"]
+						print(f"I thinks you said: {trans}")
+						# self.call_str("You: " + trans + "\n\n")
+						self.send_message(trans)
+						break
+				except:
+					pass
 				
 
 	def stop_record(self):
