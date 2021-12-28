@@ -11,7 +11,6 @@ import random
 import time
 from threading import Thread
 import threading
-import tkinter
 from tkinter import *
 import helpers as helpers
 import pyaudio
@@ -41,7 +40,7 @@ class GUI(Frame):
 			'work_aniversary': self.user['work_aniversary']
 		}
 		self.DAILY_EVENT_DICT = {
-			'ask_employee': '17:37'
+			'ask_employee': '21:39'
 		}
 		self.REMINDER_DICT = {
 			'drink_water': 0.5,
