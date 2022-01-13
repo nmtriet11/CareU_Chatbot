@@ -181,25 +181,68 @@ class Chatbot():
 
 
 class CareuBot():
-    def __init__(self, events_path='events.json', user_path='user.json'):
+    def __init__(self, events_path='./events.json', user_path='./user.json'):
         self.events_path = events_path
         self.user_path = user_path
 
-        self.user = json.loads(open().read(user_path))
+        self.user = json.loads(open(user_path).read())
         # Events dictionary: {month: {day: [tag1, tag2,...]}}
-        self.events = json.loads(open().read(events_path)) 
+        self.events = json.loads(open(events_path).read()) 
 
         self.chatbot = Chatbot()
-        self.response_history = []
+        self.response_history = {}
         self.action_tags = []
         self.personel_tags = []
 
+        # There are 3 different status: Sad, normal, and happy
+        self.change_status_dict = {
+            'how_today_sad': 'sad',
+            'how_today_normal': 'normal',
+            'how_today_happy': 'happy'
+        }
+
+        # Status based suggestions
+        self.suggest_status = {
+            'sad': ['sad_eating', 'sad_drink', 'sad_hangout', 'sad_back_family', 'sad_sharebot_story'],
+            'happy': ['happy_song', 'happy_other']
+        }
+
+        self.add_unlike_list = ['sad_sharebot_story_no', 'sad_back_family_no']
+        self.remove_unlike_list = []
+
+    def change_status(self, new_status, user_id):
+        if self.user[user_id]['status'] == new_status:
+            return True
+        try:
+            self.user[user_id]['status'] = new_status
+            with open(self.user_path, 'w', encoding='utf-8') as f:
+                json.dump(self.user, f, ensure_ascii=False, indent=4)
+        except:
+            return False
+
+    def change_unlikes(self, action='add', new=None, user_id=None):
+        if action == 'add':
+            try:
+                self.user[user_id]['unlikes'].append(new)
+                with open(self.user_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.user, f, ensure_ascii=False, indent=4)
+                return True
+            except:
+                return False
+        elif action == 'remove':
+            try:
+                self.user[user_id]['unlikes'] = [x for x in self.user[user_id]['unlikes'] if x != new]
+                with open(self.user_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.user, f, ensure_ascii=False, indent=4)
+                return True
+            except:
+                return False
 
     def response_personel_questions(self, tag):
         pass
     
-
-    def run(self, msg=None):
+    def respond(self, msg=None, user_id='000001'):
+        response_list = []
         if msg:
             ints = self.chatbot.predict_class(msg)
             tag = ints[0]['intent']
@@ -213,15 +256,53 @@ class CareuBot():
                 'response': res,
                 'action': None
             }
-            if tag in self.action_list:
+            response_list.append(response)
+            if tag in self.action_tags:
                 response['action'] = tag
-            self.response_history.append(response)
-            return [response]
-        # Check events, first quote of the day,...
-        response_list = []
+
+            # Get user status
+            if tag in list(self.change_status_dict.keys()):
+                self.change_status(self.change_status_dict[tag], user_id)
+                temp = self.suggest_status[self.change_status_dict[tag]]
+                temp = [x for x in temp if x not in self.user[user_id]['unlikes']]
+                if len(temp) == 0:
+                    tag = 'inspiration'
+                else:
+                    tag = random.choice(temp)
+                res = self.chatbot.get_response_from_tag(tag)
+                response = {
+                    'msg': msg,
+                    'tag': tag,
+                    'response': res,
+                    'action': None
+                }
+                response_list.append(response)
+                
+            if tag in self.add_unlike_list:
+                self.change_unlikes('add', tag[:-3], user_id)
+            elif tag in self.remove_unlike_list:
+                self.change_unlikes('remove', tag[-3], user_id)
+
+            try:
+                self.response_history[user_id].extend(response_list)
+            except:
+                self.response_history[user_id] = response_list
+            return response_list
+        
+        # If there's no input msg at all
+        # Check birthday / work anniversary
         month = date.today().month
         day = date.today().day
-
+        for tag in ['birthday', 'work_aniversary']:
+            if self.user[user_id][tag]['day'] == day and self.user[user_id][tag]['month'] == month:
+                response = {
+                    'msg': msg,
+                    'tag': tag,
+                    'response': self.chatbot.get_response_from_tag(tag),
+                    'action': None
+                }
+                response_list.append(response)
+        # Check events
         try:
             for event in self.events[month][day]:
                 res = self.chatbot.get_response_from_tag(event)
@@ -233,17 +314,85 @@ class CareuBot():
                 }
                 response_list.append(response)
         except:
-            res = self.chatbot.get_response_from_tag('inspiration')
+            pass
+        # Greeting, how are you today
+        temp_list = ['greeting', 'how_today']
+        if len(response_list) != 0:
+            temp_list = ['how_today']
+        for tag in temp_list:
+            res = self.chatbot.get_response_from_tag(tag)
             response = {
                 'msg': '',
-                'tag': 'inspiration',
+                'tag': tag,
                 'response': res,
                 'action': None
             }
             response_list.append(response)
-        self.response_history.extend(response_list)
+        
+        try:
+            self.response_history[user_id].extend(response_list)
+        except:
+            self.response_history[user_id] = response_list
         return response_list
-    
+
+    def run(self, msg=None, id="000001"):
+        if msg:
+            if msg == 'init':   # What the bot will do when init for the 1st time
+                response_list = []
+                if self.user[id]['status'] != 'sad':
+                    # Check events, first quote of the day,...                
+                    month = date.today().month
+                    day = date.today().day
+                    try:
+                        for event in self.events[month][day]:
+                            res = self.chatbot.get_response_from_tag(event)
+                            response = {
+                                'msg': '',
+                                'tag': event,
+                                'response': res,
+                                'action': None
+                            }
+                            response_list.append(response)
+                    except:
+                        res = self.chatbot.get_response_from_tag('inspiration')
+                        response = {
+                            'msg': '',
+                            'tag': 'inspiration',
+                            'response': res,
+                            'action': None
+                        }
+                        response_list.append(response)
+                    self.response_history.extend(response_list)
+                    return response_list
+                else: # What to do when user are sad?
+                    res = self.chatbot.get_response_from_tag('inspiration')
+                    response = {
+                        'msg': '',
+                        'tag': 'inspiration',
+                        'response': res,
+                        'action': None
+                    }
+                    response_list.append(response)
+                    self.response_history.extend(response_list)
+                    return response_list
+            else:
+                ints = self.chatbot.predict_class(msg)
+                tag = ints[0]['intent']
+                if tag in self.personel_tags:
+                    res = self.response_personel_questions(tag)
+                else:
+                    res = self.chatbot.get_response_from_tag(tag)
+                response = {
+                    'msg': msg,
+                    'tag': tag,
+                    'response': res,
+                    'action': None
+                }
+                if tag in self.action_tags:
+                    response['action'] = tag
+                self.response_history.append(response)
+                return [response]
+        
 
     def save_history(self):
         y = json.dump(self.response_history, indent = 4)
@@ -252,3 +401,16 @@ class CareuBot():
 
     def train(self):
         self.chatbot.train()
+
+def test():
+    chatbot = CareuBot()
+    res = chatbot.respond()
+    for r in res:
+        print('bot:', r['response'])
+    while 1:
+        msg = input('>>>')
+        if msg == 'abc':
+            break
+        res = chatbot.respond(msg)
+        for r in res:
+            print('bot:', r['response'])
