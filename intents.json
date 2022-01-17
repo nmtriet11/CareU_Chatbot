@@ -71,7 +71,7 @@
 		},
 		{"tag": "sad_back_family_no",
 		"patterns": ["I do not want to come home now", "I hate my family", "I do not like my family", "I don't like your suggestion", "I do not want my family to hear my stories"],
-		"responses": ["I see. How about hanging out with your friends?", "Oh,sorry! How about hanging out with your colleagues? In a party you can share your feeling."],  
+		"responses": ["Oh, I'm so sorry to hear that"],  
 		"context": ["sad_back_family"]
 		},
 		{"tag": "sad_sharebot_story",
@@ -86,7 +86,7 @@
 		},
 		{"tag": "sad_sharebot_story_no",
 		"patterns": ["I don't want to share", "I will not share", "No, I dont like to share"],
-		"responses": ["It's fine, please just do what make you  comfortable. I can suggest you having some sweets to feel better."],
+		"responses": ["Oh, I'm so sorry to hear that"],
 		"context": ["sad_sharebot_story"]
 		},
 		{"tag": "cheer_job",

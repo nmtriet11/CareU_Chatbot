@@ -280,6 +280,20 @@ class CareuBot():
                 
             if tag in self.add_unlike_list:
                 self.change_unlikes('add', tag[:-3], user_id)
+                temp = self.suggest_status[self.user[user_id]['status']]
+                temp = [x for x in temp if x not in self.user[user_id]['unlikes']]
+                if len(temp) == 0:
+                    tag = 'inspiration'
+                else:
+                    tag = random.choice(temp)
+                res = self.chatbot.get_response_from_tag(tag)
+                response = {
+                    'msg': msg,
+                    'tag': tag,
+                    'response': res,
+                    'action': None
+                }
+                response_list.append(response)
             elif tag in self.remove_unlike_list:
                 self.change_unlikes('remove', tag[-3], user_id)
 
