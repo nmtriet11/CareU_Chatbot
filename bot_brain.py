@@ -408,7 +408,7 @@ def test():
     for r in res:
         print('bot:', r['response'])
     while 1:
-        msg = input('>>>')
+        msg = input('>>> ')
         if msg == 'abc':
             break
         res = chatbot.respond(msg)

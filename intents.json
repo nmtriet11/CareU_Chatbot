@@ -46,7 +46,7 @@
 		},
 		{"tag": "how_today_sad",
 		"patterns": ["I am sorrowful", "I am unhappy today", "too bad", "stress", "I am stressful", "bad", "not good", "many problems", "many issues", "many bugs", "I feel not good", "sad", "I feel sad", "so bad"],
-		"responses": ["I am so sorry to hear that", "It seems a bad day to you, I am sorry to hear that", "Oh, I'm sorry to hear that. I think that I can suggest you something to make you feel better", "I am sorry to hear that. I have some suggestions to make you feel better"],
+		"responses": ["I am so sorry to hear that", "It seems like a bad day to you, I am sorry to hear that", "Oh, I'm sorry to hear that. I think that I can suggest you something to make you feel better", "I am sorry to hear that. I have some suggestions to make you feel better"],
 		"context": [""]
 		},
 		{"tag": "sad_eating",
@@ -117,12 +117,12 @@
 		{"tag": "happy_song",
 		"patterns": [],
 		"responses": ["This song is for you today: https://www.youtube.com/watch?v=ZbZSe6N_BXs", "I think this song is great for starting your great day! Let's listen if you have time - https://youtu.be/OPf0YbXqDm0", "I suggest this song for your sweet day - https://youtu.be/N1BcpzPGlYQ"],
-		"context": ["happy"]
+		"context": [""]
 		},
 		{"tag": "happy_other",
 		"patterns": [],
-		"responses": ["It seems a great day to do. How about do yoga if you have time after working?"],
-		"context": ["happy"]
+		"responses": ["It seems a great day to you. How about do yoga if you have time after working?"],
+		"context": [""]
 		},
 		{"tag": "how_today_normal",
 		"patterns": ["Good", "I'm fine", "normal", "nothing"],
@@ -242,21 +242,6 @@
         {"tag": "ask_employee",
         "patterns": [],
         "responses": ["How do you feel today?"],
-        "context": [""]
-        },
-        {"tag": "answer_good",
-        "patterns": ["good", "best", "terrific", "today is good", "it is terrific", "better", "this is the best day", "awesome", "delightful", "nice"],
-        "responses": ["Thank you for your response. I'm glad that you're having a good day."],
-        "context": [""]
-        },
-        {"tag": "answer_neutral",
-        "patterns": ["normal", "neutral", "today is normal", "it is neutral", "same day", "as usual"],
-        "responses": ["Thank you for your response. I'm having a feeling that tomorrow is going to be nice."],
-        "context": [""]
-        },
-        {"tag": "answer_bad",
-        "patterns": ["bad", "worse", "worst", "today is bad", "it is terrible", "worse", "this is the worst day", "not good", "I'm tired today", "boring"],
-        "responses": ["Thank you for your response. I'm sorry to hear that, tomorrow is going to be a brand new awesome day, trust me."],
         "context": [""]
         },
         {"tag": "joke",

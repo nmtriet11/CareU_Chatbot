@@ -11,10 +11,9 @@
             "month": 8,
             "year": 2021
         },
-        "status": "sad",
+        "status": "happy",
         "unlikes": [
-            "sad_drink",
-            "sad_back_family"
+            "sad_drink"
         ]
     }
 }
