@@ -203,11 +203,13 @@ class CareuBot():
 
         # Status based suggestions
         self.suggest_status = {
-            'sad': ['sad_eating', 'sad_drink', 'sad_hangout', 'sad_back_family', 'sad_sharebot_story'],
-            'happy': ['happy_song', 'happy_other']
+            'sad': [
+                'sad_drink', 'sad_hangout', 'sad_back_family', 'sad_eating_sweet_choco', 'sad_eating_sweet_other'
+            ],
+            'happy': ['happy_song', 'happy_other', 'happy_practice', 'happy_share_family'],
+            'normal': []
         }
-
-        self.add_unlike_list = ['sad_sharebot_story_no', 'sad_back_family_no']
+        # self.add_unlike_list = ['sad_sharebot_story_no', 'sad_back_family_no']
         self.remove_unlike_list = []
 
     def change_status(self, new_status, user_id):
@@ -245,7 +247,19 @@ class CareuBot():
         response_list = []
         if msg:
             ints = self.chatbot.predict_class(msg)
-            tag = ints[0]['intent']
+            print(ints)
+            context = self.response_history[user_id][-1]['tag']
+            tag = ''
+            for index, intention in enumerate(ints):
+                try:
+                    if index == 0:
+                        tag = intention['intent']
+                    elif self.chatbot.intents[intention['intent']]['context'] == context:
+                        tag = intention['intent']
+                        break
+                except:
+                    if tag == '':
+                        tag = 'inspiration'
             if tag in self.personel_tags:
                 res = self.response_personel_questions(tag)
             else:
@@ -278,7 +292,7 @@ class CareuBot():
                 }
                 response_list.append(response)
                 
-            if tag in self.add_unlike_list:
+            if tag[-3:] == '_no' and (tag[:-3] in self.suggest_status['sad'] or tag[:-3] in self.suggest_status['happy']):
                 self.change_unlikes('add', tag[:-3], user_id)
                 temp = self.suggest_status[self.user[user_id]['status']]
                 temp = [x for x in temp if x not in self.user[user_id]['unlikes']]
@@ -427,4 +441,6 @@ def test():
             break
         res = chatbot.respond(msg)
         for r in res:
-            print('bot:', r['response'])
+            print('bot({}): {}'.format(r['tag'], r['response']))
+
+test()
